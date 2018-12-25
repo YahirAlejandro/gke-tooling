@@ -1,4 +1,4 @@
 FROM iron/base
-WORKDIR /app
-COPY getinfo /app/
+WORKDIR /
+COPY getinfo /
 ENTRYPOINT ["./getinfo"]
