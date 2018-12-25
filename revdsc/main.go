@@ -25,15 +25,21 @@ func validate_cidr(cidr string) bool {
 	return true
 }
 
-func lookup_all_cidr_hosts(cidr string) {
+func lookup_all_cidr_hosts(cidr string) []string {
 	octet := strings.Split(cidr, ".")
+	var found_hosts []string
 
 	for i := 2; i <= 254; i++ {
 		lookup_ip := fmt.Sprintf("%s.%s.%s.%v", octet[0], octet[1], octet[2], i)
 		fmt.Printf("Will look up for: %s\n", lookup_ip)
 		addr, err := net.LookupAddr(lookup_ip)
-		fmt.Println(addr, err)
+		if err == nil {
+			found_hosts = append(found_hosts, addr...)
+		} else {
+			found_hosts = append(found_hosts, "No hosts found for "+lookup_ip)
+		}
 	}
+	return found_hosts
 }
 
 func get_pods(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +50,15 @@ func get_pods(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Will use %s as searching address space...\n", pod_cidr)
 	}
 
-	lookup_all_cidr_hosts(pod_cidr)
+	found_hosts := lookup_all_cidr_hosts(pod_cidr)
+	if len(found_hosts) == 1 {
+		fmt.Fprintf(w, "Looks like we only found 1... so it's 0.")
+	} else {
+		for i, host := range found_hosts {
+			i++
+			fmt.Fprintf(w, "%v.- Address: %s\n", i, host)
+		}
+	}
 }
 
 func main() {
