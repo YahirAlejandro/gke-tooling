@@ -2,4 +2,5 @@
 # $ CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 FROM scratch
 ADD main /
+EXPOSE 8081
 CMD ["/main"]
